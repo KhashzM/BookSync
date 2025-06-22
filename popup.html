@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书签同步助手</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h1>书签同步助手</h1>
+            </div>
+            <p class="subtitle">本地备份 + 坚果云WebDAV云端存储</p>
+        </header>
+        
+        <main>
+            <!-- 备份状态区域 -->
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2>备份状态</h2>
+                </div>
+                <div class="status-content">
+                    <p>选择备份方式并点击"立即备份"按钮开始备份您的书签。</p>
+                    
+                    <div class="backup-info">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <span id="lastBackup">-</span>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <span id="lastFilename">-</span>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <span id="backupType">未选择备份方式</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                    
+                    <div class="backup-count">
+                        <span id="folderCount">0 个文件夹</span>
+                        <span id="bookmarkCount">0 个书签</span>
+                    </div>
+                    
+                    <div class="actions">
+                        <button id="manualBackup" class="btn primary">
+                            <i class="fas fa-download"></i> 立即备份
+                        </button>
+                        <button id="viewFolder" class="btn secondary">
+                            <i class="fas fa-folder-open"></i> 打开目录
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 备份历史区域 -->
+            <!-- <div class="section-title">
+                <i class="fas fa-history"></i>
+                <h3>最近备份</h3>
+            </div>
+            <div class="backup-history">
+                <div class="history-list" id="historyList">
+                    <div class="empty-history">暂无备份历史记录</div>
+                </div>
+            </div> -->
+            <!-- 备份回档区域 -->
+            <div class="section-title">
+                <i class="fas fa-undo"></i>
+                <h3>文件回档</h3>
+            </div>
+            <div class="settings" style="padding-top: 15px;">
+                <div class="file-select-container">
+                    <select id="fileSelect" class="file-select">
+                        <option disabled selected>加载中...</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button id="refreshBtn" class="btn secondary" title="刷新文件列表">
+                        <i class="fas fa-sync-alt"></i> 刷新
+                    </button>
+                    <button id="loadBtn" class="btn primary">加载云端文件</button>
+                    <button id="loadLocalBtn" class="btn secondary">
+                        <i class="fas fa-folder-open"></i> 加载本地文件
+                    </button>
+                </div>
+            </div>
+
+            <!-- 设置区域 -->
+            <div class="section-title">
+                <i class="fas fa-cog"></i>
+                <h3>设置选项</h3>
+            </div>
+            <div class="settings">
+                <div class="switch-container">
+                    <span>启用自动备份</span>
+                    <label class="switch">
+                        <input type="checkbox" id="autoBackup" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="switch-container">
+                    <span>备份时显示通知</span>
+                    <label class="switch">
+                        <input type="checkbox" id="showNotification" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="switch-container">
+                    <span>浏览器启动时自动检查云端更新</span>
+                    <label class="switch">
+                        <input type="checkbox" id="autoCheckEnabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="backupMethod">备份方式</label>
+                    <select id="backupMethod">
+                        <option value="local">本地下载</option>
+                        <option value="webdav">WebDAV云端备份</option>
+                    </select>
+                </div>
+                
+                <div class="section-title" style="margin-top: 20px; margin-bottom: 15px;">
+                    <i class="fas fa-cloud"></i>
+                    <h3>WebDAV设置</h3>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="webdavUrl">服务器地址</label>
+                    <input type="url" id="webdavUrl" placeholder="https://example.com/dav">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="webdavPath">文件路径</label>
+                    <input type="text" id="webdavPath" placeholder="/bookmarks/{filename}">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="webdavUsername">用户名</label>
+                    <input type="text" id="webdavUsername" placeholder="您的用户名">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="webdavPassword">密码</label>
+                    <input type="password" id="webdavPassword" placeholder="您的密码">
+                </div>
+                
+                <div class="webdav-test">
+                    <button id="testWebdav" class="test-btn">
+                        <i class="fas fa-plug"></i> 测试WebDAV连接
+                    </button>
+                </div>
+                <div class="actions">
+                    <button id="saveSettings" class="btn primary">
+                        <i class="fas fa-save"></i> 保存设置
+                    </button>
+                      
+                </div>
+                  
+                <div class="setting-item">
+                    <label>说明：</label>
+                    <p style="font-size: 13px; color: var(--medium-text); margin-top: 8px;">
+                        在文件路径中使用 <code>{filename}</code> 作为占位符，例如: 
+                        <code>/backups/bookmarks/{filename}</code>
+                    </p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>书签云端备份 v1.0 &copy; 2023</p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">备份成功完成！</span>
+    </div>
+    <script src="popup.js"></script>
+
+</body>
+</html>

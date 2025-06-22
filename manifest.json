@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "书签同步助手",
+  "version": "1.0",
+  "description": "本地备份 + 坚果云WebDAV云端存储",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "bookmarks",
+    "downloads",
+    "notifications",
+    "storage",
+    "offscreen"
+  ],
+  "host_permissions": [
+  "*://*.jianguoyun.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "offscreen": {
+    "path": "offscreen.html",
+    "reasons": ["DOM_PARSER"],
+    "justification": "Required to parse WebDAV XML responses."
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+"content_security_policy": {
+  "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline';"
+  }
+  
+}
